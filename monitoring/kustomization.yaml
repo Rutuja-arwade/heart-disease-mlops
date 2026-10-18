@@ -1,0 +1,29 @@
+# Prometheus + Grafana for Kubernetes:  kubectl apply -k monitoring/
+# Re-uses the same alert rules and dashboard JSON as docker-compose.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: monitoring
+resources:
+  - k8s/namespace.yaml
+  - k8s/prometheus.yaml
+  - k8s/grafana.yaml
+generatorOptions:
+  disableNameSuffixHash: true
+configMapGenerator:
+  - name: prometheus-config
+    files:
+      - prometheus.yml=prometheus/prometheus-k8s.yml
+      - alert_rules.yml=prometheus/alert_rules.yml
+  - name: grafana-datasources
+    files:
+      - prometheus.yml=grafana/provisioning/datasources/prometheus.yml
+  - name: grafana-dashboard-provider
+    files:
+      - provider.yml=grafana/provisioning/dashboards/provider.yml
+  - name: grafana-dashboards
+    files:
+      - heart-api-dashboard.json=grafana/dashboards/heart-api-dashboard.json
+secretGenerator:
+  - name: grafana-admin
+    literals:
+      - password=heart-admin # demo only - override for real environments

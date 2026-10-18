@@ -1,0 +1,53 @@
+# Local stack: API + Prometheus + Grafana
+#   docker compose up -d --build
+#   API http://localhost:8000/docs | Prometheus http://localhost:9090 | Grafana http://localhost:3000
+name: heart-disease-mlops
+
+services:
+  api:
+    build: .
+    image: heart-disease-api:1.0.0
+    container_name: heart-api
+    ports:
+      - "8000:8000"
+    environment:
+      LOG_LEVEL: INFO
+      LOG_FILE: /app/logs/api.log
+    volumes:
+      - api-logs:/app/logs
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: heart-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+      - --web.enable-lifecycle
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: heart-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-heart-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/heart-api-dashboard.json
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  api-logs:

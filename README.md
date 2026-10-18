@@ -117,6 +117,27 @@ Ingress: `heart-api.local` is routed by NGINX. To test without editing `/etc/hos
 └── docs/report/            final report (REPORT.md draft, .docx, .pdf) + architecture diagram
 ```
 
-## 6. Report
+## 6. CI/CD
 
-See [docs/report/](docs/report/). It covers setup, EDA, modelling choices, the experiment-tracking summary, architecture, CI/CD and deployment screenshots.
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) runs on every push and pull request to `main`. The jobs are:
+
+1. Lint (ruff, helm lint, rendered manifests).
+2. Unit tests (pytest with JUnit and coverage).
+3. Training with MLflow, followed by a quality gate that fails when CV or test ROC-AUC is below 0.85 or recall is below 0.75.
+4. Docker build and container smoke test.
+5. kind cluster + Helm install + `helm test` + smoke test.
+6. Push to GHCR.
+
+Each job uploads its logs and artifacts. Any failing step stops the pipeline. For example, [PR #1](https://github.com/Rutuja-arwade/heart-disease-mlops/pull/1)
+introduced a deliberate bug: the unit tests failed, and training, image build and deployment were skipped.
+
+## 7. Report, screenshots and video
+
+| Deliverable | Location |
+|---|---|
+| Final report | [docs/report/report.pdf](docs/report/report.pdf) · [report.docx](docs/report/report.docx) · Markdown draft [REPORT.md](docs/report/REPORT.md) |
+| Architecture diagram | [docs/report/architecture.png](docs/report/architecture.png) |
+| Screenshots (per task) | [screenshots/](screenshots/README.md) |
+| Pipeline walkthrough video | [docs/video/pipeline_walkthrough.mp4](docs/video/pipeline_walkthrough.mp4) |
+
+Rebuild the report with `python docs/report/build_report.py` (needs pandoc and Google Chrome).

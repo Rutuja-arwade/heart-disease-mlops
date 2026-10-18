@@ -385,7 +385,7 @@ POST /predict  {"age":63,"sex":1,"cp":4,"trestbps":150,"chol":286,"fbs":0,"reste
   non-2xx share, p95 latency, request rate by endpoint and status, p50/p95/p99 latency, outcome split, risk bands, mean
   predicted probability, predictions per second, 422 rate and in-flight requests.
 
-![Figure - Grafana dashboard on Kubernetes during a load test (two pods, 3.3k predictions, 4.9 % deliberately invalid requests)](../../screenshots/24_grafana_dashboard_k8s.png)
+![Figure - Grafana dashboard on Kubernetes during a load test (two pods scraped, 4.6k predictions served, 4.9 % non-2xx = the deliberately invalid requests)](../../screenshots/24_grafana_dashboard_k8s.png)
 
 | | |
 |---|---|

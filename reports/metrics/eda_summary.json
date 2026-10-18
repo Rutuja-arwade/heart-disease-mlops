@@ -1,0 +1,26 @@
+{
+  "rows": 303,
+  "features": 13,
+  "class_counts": {
+    "No disease": 164,
+    "Disease": 139
+  },
+  "top_target_correlations": {
+    "thal": 0.526,
+    "ca": 0.46,
+    "exang": 0.432,
+    "oldpeak": 0.425,
+    "thalach": -0.417,
+    "cp": 0.414
+  },
+  "figures": [
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/01_class_balance.png",
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/02_missing_values.png",
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/03_feature_histograms.png",
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/04_correlation_heatmap.png",
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/05_target_correlation.png",
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/06_categorical_disease_rate.png",
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/07_boxplots.png",
+    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/08_age_vs_max_hr.png"
+  ]
+}

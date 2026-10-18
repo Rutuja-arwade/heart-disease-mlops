@@ -1,0 +1,14 @@
+,No disease,Disease
+age,52.59,56.63
+sex,0.56,0.82
+cp,2.79,3.59
+trestbps,129.25,134.57
+chol,242.64,251.47
+fbs,0.14,0.16
+restecg,0.84,1.17
+thalach,158.38,139.26
+exang,0.14,0.55
+oldpeak,0.59,1.57
+slope,1.41,1.83
+ca,0.27,1.14
+thal,3.8,5.84

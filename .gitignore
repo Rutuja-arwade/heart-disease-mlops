@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+.ipynb_checkpoints/
+
+# MLflow local stores (re-created by `make train`; CI uploads them as artifacts)
+mlruns/
+mlartifacts/
+mlflow.db
+
+# Logs / runtime output
+logs/
+*.log
+artifacts/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Course hand-out (not redistributed)
+MLOps Assignment 1 Instructions.pdf

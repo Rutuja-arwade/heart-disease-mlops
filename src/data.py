@@ -58,9 +58,9 @@ def download_raw_data(
     destination = Path(destination)
     if destination.exists() and not force:
         if sha256_of(destination) == config.RAW_DATA_SHA256:
-            logger.info("Raw data already present and verified: %s", destination)
+            logger.info("Raw data already present and verified: %s", config.display_path(destination))
             return destination
-        logger.warning("Checksum mismatch for %s, downloading again", destination)
+        logger.warning("Checksum mismatch for %s, downloading again", config.display_path(destination))
 
     destination.parent.mkdir(parents=True, exist_ok=True)
     errors = []
@@ -73,7 +73,7 @@ def download_raw_data(
                 checksum = sha256_of(destination)
                 if checksum != config.RAW_DATA_SHA256:
                     logger.warning("Downloaded file checksum %s differs from expected", checksum)
-                logger.info("Saved %d bytes to %s", len(payload), destination)
+                logger.info("Saved %d bytes to %s", len(payload), config.display_path(destination))
                 return destination
             except (requests.RequestException, KeyError, zipfile.BadZipFile) as exc:
                 errors.append(f"{url}: {exc}")
@@ -155,7 +155,7 @@ def run(force: bool = False) -> pd.DataFrame:
     clean.to_csv(config.CLEAN_DATA_FILE, index=False)
     report_path = config.PROCESSED_DATA_DIR / "cleaning_report.json"
     report_path.write_text(json.dumps(report, indent=2))
-    logger.info("Clean dataset written to %s (%d rows)", config.CLEAN_DATA_FILE, len(clean))
+    logger.info("Clean dataset written to %s (%d rows)", config.display_path(config.CLEAN_DATA_FILE), len(clean))
     logger.info("Cleaning report: %s", json.dumps(report))
     return clean
 

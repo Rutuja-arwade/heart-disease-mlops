@@ -14,13 +14,13 @@
     "cp": 0.414
   },
   "figures": [
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/01_class_balance.png",
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/02_missing_values.png",
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/03_feature_histograms.png",
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/04_correlation_heatmap.png",
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/05_target_correlation.png",
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/06_categorical_disease_rate.png",
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/07_boxplots.png",
-    "/Users/aryanmali/Personal/macbook/vault/personal/ruri/ML Ops Assignment/reports/figures/08_age_vs_max_hr.png"
+    "reports/figures/01_class_balance.png",
+    "reports/figures/02_missing_values.png",
+    "reports/figures/03_feature_histograms.png",
+    "reports/figures/04_correlation_heatmap.png",
+    "reports/figures/05_target_correlation.png",
+    "reports/figures/06_categorical_disease_rate.png",
+    "reports/figures/07_boxplots.png",
+    "reports/figures/08_age_vs_max_hr.png"
   ]
 }

@@ -50,8 +50,8 @@ def _save(fig, name: str) -> str:
     path = config.FIGURES_DIR / name
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
-    logger.info("saved %s", path)
-    return str(path)
+    logger.info("saved %s", config.display_path(path))
+    return config.display_path(path)
 
 
 def plot_class_balance(df: pd.DataFrame) -> str:

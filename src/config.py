@@ -34,6 +34,15 @@ DATA_URLS = [
 # SHA-256 of the canonical processed.cleveland.data file (303 rows).
 RAW_DATA_SHA256 = "a74b7efa387bc9d108d7d0115d831fe9b414b29ae7124f331b622b4efa0427c8"
 
+
+def display_path(path: Path) -> str:
+    """Repository-relative path for logs and reports (no machine-specific prefixes)."""
+    try:
+        return str(Path(path).resolve().relative_to(ROOT_DIR))
+    except ValueError:
+        return str(path)
+
+
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 CV_FOLDS = 5

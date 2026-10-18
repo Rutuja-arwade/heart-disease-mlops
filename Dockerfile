@@ -30,14 +30,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PORT=8000 \
     WORKERS=1
 
-RUN groupadd --system app && useradd --system --gid app --home-dir /app --no-create-home app
+# Numeric UID/GID so Kubernetes can enforce runAsNonRoot.
+RUN groupadd --system --gid 10001 app && useradd --system --uid 10001 --gid app --home-dir /app --no-create-home app
 WORKDIR /app
 COPY --from=builder /opt/venv /opt/venv
 COPY src/ ./src/
 COPY models/model.joblib models/model_metadata.json ./models/
 COPY sample_request.json ./
-RUN mkdir -p /app/logs && chown -R app:app /app
-USER app
+RUN mkdir -p /app/logs && chown -R 10001:10001 /app
+USER 10001:10001
 
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \

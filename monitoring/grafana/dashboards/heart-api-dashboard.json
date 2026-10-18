@@ -580,7 +580,7 @@
         "pieType": "donut",
         "legend": {
           "displayMode": "table",
-          "placement": "right",
+          "placement": "bottom",
           "values": [
             "value",
             "percent"
@@ -660,7 +660,7 @@
       ],
       "options": {
         "orientation": "horizontal",
-        "displayMode": "gradient",
+        "displayMode": "basic",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -674,10 +674,57 @@
         "defaults": {
           "unit": "short",
           "color": {
-            "mode": "continuous-GrYlRd"
+            "mode": "fixed",
+            "fixedColor": "#8ab8ff"
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "low"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#2a9d8f"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "moderate"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e9c46a"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "high"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#e76f51"
+                }
+              }
+            ]
+          }
+        ]
       }
     },
     {
@@ -700,7 +747,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(rate(heart_api_prediction_probability_sum[2m])) / clamp_min(sum(rate(heart_api_prediction_probability_count[2m])), 1e-9)",
+          "expr": "sum(rate(heart_api_prediction_probability_sum[2m])) / sum(rate(heart_api_prediction_probability_count[2m]))",
           "legendFormat": "mean P(disease)",
           "refId": "A"
         }
@@ -716,7 +763,9 @@
             "stacking": {
               "mode": "none"
             }
-          }
+          },
+          "min": 0,
+          "max": 1
         },
         "overrides": []
       },

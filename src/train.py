@@ -415,7 +415,12 @@ def main() -> None:
     parser.add_argument("--quick", action="store_true", help="single-candidate search for smoke testing")
     parser.add_argument("--no-register", action="store_true", help="skip MLflow model registry")
     args = parser.parse_args()
+    # Initialise the tracking store before configuring logging: on a fresh sqlite store MLflow
+    # runs alembic migrations, whose fileConfig() resets the root logger and disables ours.
+    mlflow.set_tracking_uri(config.MLFLOW_TRACKING_URI)
+    mlflow.set_experiment(config.MLFLOW_EXPERIMENT)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", force=True)
+    logger.disabled = False
     logging.getLogger("mlflow").setLevel(logging.WARNING)
     metadata = run(quick=args.quick, register=not args.no_register)
     print(json.dumps({"champion": metadata["model_family"], **metadata["test_metrics"]}, indent=2))

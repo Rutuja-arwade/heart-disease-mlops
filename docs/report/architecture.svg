@@ -1,0 +1,209 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1060" width="1600" height="1060" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3d4451"/>
+    </marker>
+    <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#2a9d8f"/>
+    </marker>
+    <style>
+      .lane{fill:#f7f9fb;stroke:#d6dde6;stroke-width:1.5}
+      .lt{font-size:15px;font-weight:700;fill:#3d4451;letter-spacing:.5px}
+      .b{fill:#fff;stroke:#264653;stroke-width:1.6;rx:9}
+      .bt{font-size:14px;font-weight:700;fill:#1d2733}
+      .bs{font-size:11.5px;fill:#55606e}
+      .ci{fill:#eef6ff;stroke:#2f6fb5}
+      .k8s{fill:#eef9f6;stroke:#2a9d8f}
+      .mon{fill:#fff6ec;stroke:#e08a2c}
+      .ml{fill:#f3efff;stroke:#6a4cc2}
+      .e{stroke:#3d4451;stroke-width:1.6;fill:none;marker-end:url(#a)}
+      .eg{stroke:#2a9d8f;stroke-width:1.6;fill:none;marker-end:url(#ag);stroke-dasharray:5 4}
+      .lbl{font-size:11px;fill:#3d4451}
+    </style>
+  </defs>
+  <rect width="1600" height="1060" fill="#ffffff"/>
+  <text x="30" y="38" font-size="24" font-weight="700" fill="#1d2733">Heart Disease Risk - MLOps architecture</text>
+  <text x="30" y="60" font-size="13" fill="#55606e">Data → experiments → packaged model → CI/CD → Kubernetes serving → monitoring</text>
+
+  <!-- Lane 1: data & experimentation -->
+  <rect class="lane" x="20" y="80" width="1560" height="250" rx="12"/>
+  <text class="lt" x="38" y="104">1 · DATA &amp; EXPERIMENTATION (local / CI runner)</text>
+
+  <rect class="b" x="40" y="125" width="170" height="80"/>
+  <text class="bt" x="55" y="150">UCI ML Repository</text>
+  <text class="bs" x="55" y="170">processed.cleveland.data</text>
+  <text class="bs" x="55" y="186">303 rows · 14 attributes</text>
+
+  <rect class="b" x="250" y="125" width="200" height="80"/>
+  <text class="bt" x="265" y="150">src/data.py</text>
+  <text class="bs" x="265" y="170">download (mirror + SHA-256)</text>
+  <text class="bs" x="265" y="186">validate · binarise target</text>
+
+  <rect class="b" x="250" y="230" width="200" height="80"/>
+  <text class="bt" x="265" y="255">src/eda.py · notebooks</text>
+  <text class="bs" x="265" y="275">histograms · heatmap · balance</text>
+  <text class="bs" x="265" y="291">reports/figures/*.png</text>
+
+  <rect class="b" x="490" y="125" width="270" height="185"/>
+  <text class="bt" x="505" y="150">src/train.py</text>
+  <text class="bs" x="505" y="172">sklearn Pipeline:</text>
+  <text class="bs" x="515" y="189">ClinicalFeatureBuilder (2 derived feats)</text>
+  <text class="bs" x="515" y="205">impute → scale / one-hot (ColumnTransformer)</text>
+  <text class="bs" x="505" y="227">Models: LogReg · RandomForest · GBoost</text>
+  <text class="bs" x="505" y="244">Grid / Randomised search, stratified 5-fold CV</text>
+  <text class="bs" x="505" y="261">metrics: acc · prec · recall · F1 · ROC-AUC</text>
+  <text class="bs" x="505" y="278">champion = best mean CV ROC-AUC</text>
+  <text class="bs" x="505" y="295">hold-out test (20 %) for final check</text>
+
+  <rect class="b ml" x="810" y="125" width="260" height="185"/>
+  <text class="bt" x="825" y="150">MLflow tracking + registry</text>
+  <text class="bs" x="825" y="172">experiment: heart-disease-risk</text>
+  <text class="bs" x="825" y="189">4 parent runs (1 per model family)</text>
+  <text class="bs" x="825" y="205">112 nested trial runs (params + CV)</text>
+  <text class="bs" x="825" y="222">plots: ROC · PR · confusion · calibration</text>
+  <text class="bs" x="825" y="238">cv_results.csv · feature importance</text>
+  <text class="bs" x="825" y="255">logged sklearn model + signature</text>
+  <text class="bs" x="825" y="272">registry: heart-disease-classifier</text>
+  <text class="bs" x="825" y="288">alias @champion</text>
+
+  <rect class="b" x="1120" y="125" width="220" height="185"/>
+  <text class="bt" x="1135" y="150">Packaged model</text>
+  <text class="bs" x="1135" y="172">models/model.joblib</text>
+  <text class="bs" x="1145" y="188">(full preprocessing + estimator)</text>
+  <text class="bs" x="1135" y="208">models/mlflow_model/ (pyfunc)</text>
+  <text class="bs" x="1135" y="228">models/model_metadata.json</text>
+  <text class="bs" x="1145" y="244">git commit · data SHA · metrics</text>
+  <text class="bs" x="1135" y="266">requirements*.txt (pinned)</text>
+  <text class="bs" x="1135" y="284">environment.yml</text>
+
+  <rect class="b" x="1380" y="125" width="180" height="80"/>
+  <text class="bt" x="1395" y="150">test/ (pytest)</text>
+  <text class="bs" x="1395" y="170">45 tests · 89 % coverage</text>
+  <text class="bs" x="1395" y="186">data · features · model · API</text>
+
+  <path class="e" d="M210,165 L248,165"/>
+  <path class="e" d="M350,205 L350,228"/>
+  <path class="e" d="M450,165 L488,165"/>
+  <path class="e" d="M760,215 L808,215"/>
+  <text class="lbl" x="765" y="207">log</text>
+  <path class="e" d="M1070,215 L1118,215"/>
+  <text class="lbl" x="1075" y="207">export</text>
+
+  <!-- Lane 2: CI/CD -->
+  <rect class="lane" x="20" y="350" width="1560" height="200" rx="12"/>
+  <text class="lt" x="38" y="374">2 · CI/CD - GitHub Actions (.github/workflows/ci.yml) - every push / PR to main</text>
+  <g>
+    <rect class="b ci" x="40" y="395" width="200" height="90"/>
+    <text class="bt" x="55" y="420">① Lint</text>
+    <text class="bs" x="55" y="440">ruff check + format</text>
+    <text class="bs" x="55" y="456">helm lint · render manifests</text>
+    <rect class="b ci" x="290" y="395" width="200" height="90"/>
+    <text class="bt" x="305" y="420">② Unit tests</text>
+    <text class="bs" x="305" y="440">clean pip install</text>
+    <text class="bs" x="305" y="456">pytest · JUnit · coverage</text>
+    <rect class="b ci" x="540" y="395" width="200" height="90"/>
+    <text class="bt" x="555" y="420">③ Train + track</text>
+    <text class="bs" x="555" y="440">data → EDA → train (MLflow)</text>
+    <text class="bs" x="555" y="456">quality gate (AUC, recall)</text>
+    <rect class="b ci" x="790" y="395" width="200" height="90"/>
+    <text class="bt" x="805" y="420">④ Docker</text>
+    <text class="bs" x="805" y="440">build image with new model</text>
+    <text class="bs" x="805" y="456">run + smoke test /predict</text>
+    <rect class="b ci" x="1040" y="395" width="210" height="90"/>
+    <text class="bt" x="1055" y="420">⑤ Deploy test (kind)</text>
+    <text class="bs" x="1055" y="440">server dry-run manifests</text>
+    <text class="bs" x="1055" y="456">helm install · helm test</text>
+    <text class="bs" x="1055" y="472">smoke test via port-forward</text>
+    <rect class="b ci" x="1300" y="395" width="260" height="90"/>
+    <text class="bt" x="1315" y="420">⑥ Publish (main only)</text>
+    <text class="bs" x="1315" y="440">ghcr.io/rutuja-arwade/</text>
+    <text class="bs" x="1315" y="456">heart-disease-api:{1.0.0,latest,sha}</text>
+  </g>
+  <path class="e" d="M240,440 L288,440"/><path class="e" d="M490,440 L538,440"/>
+  <path class="e" d="M740,440 L788,440"/><path class="e" d="M990,440 L1038,440"/><path class="e" d="M1250,440 L1298,440"/>
+  <text class="bs" x="40" y="520">Each job uploads artifacts: rendered manifests · test reports (JUnit, coverage) · mlflow-tracking (mlruns, mlflow.db, figures) · model · docker image + logs · k8s state logs.</text>
+  <text class="bs" x="40" y="538">Every step runs under bash -eo pipefail, so a lint error, failing test, quality-gate miss or failed smoke test stops the pipeline with a clear log.</text>
+
+  <!-- Lane 3: runtime -->
+  <rect class="lane" x="20" y="570" width="1560" height="470" rx="12"/>
+  <text class="lt" x="38" y="594">3 · SERVING &amp; MONITORING - Kubernetes (Minikube)</text>
+
+  <rect class="b" x="40" y="640" width="170" height="110"/>
+  <text class="bt" x="55" y="665">Clients</text>
+  <text class="bs" x="55" y="687">curl / Swagger UI (/docs)</text>
+  <text class="bs" x="55" y="703">scripts/load_test.py</text>
+  <text class="bs" x="55" y="719">helm test pod</text>
+
+  <rect class="b k8s" x="260" y="615" width="230" height="75"/>
+  <text class="bt" x="275" y="640">Service (LoadBalancer)</text>
+  <text class="bs" x="275" y="660">:8080 → pod :8000</text>
+  <text class="bs" x="275" y="676">EXTERNAL-IP via minikube tunnel</text>
+  <rect class="b k8s" x="260" y="705" width="230" height="75"/>
+  <text class="bt" x="275" y="730">Ingress (NGINX)</text>
+  <text class="bs" x="275" y="750">host heart-api.local → Service</text>
+  <text class="bs" x="275" y="766">minikube ingress addon</text>
+
+  <rect class="b k8s" x="540" y="615" width="440" height="265"/>
+  <text class="bt" x="555" y="640">Deployment heart-heart-disease-api (namespace heart-disease)</text>
+  <text class="bs" x="555" y="660">Helm chart deploy/helm/heart-disease-api · RollingUpdate maxUnavailable 0</text>
+  <rect x="560" y="675" width="190" height="130" rx="8" fill="#ffffff" stroke="#2a9d8f"/>
+  <text class="bt" x="572" y="697">Pod 1</text>
+  <text class="bs" x="572" y="716">FastAPI + uvicorn</text>
+  <text class="bs" x="572" y="732">model.joblib in image</text>
+  <text class="bs" x="572" y="748">probes /health /ready</text>
+  <text class="bs" x="572" y="764">non-root UID 10001</text>
+  <text class="bs" x="572" y="780">read-only root FS</text>
+  <rect x="770" y="675" width="190" height="130" rx="8" fill="#ffffff" stroke="#2a9d8f"/>
+  <text class="bt" x="782" y="697">Pod 2</text>
+  <text class="bs" x="782" y="716">POST /predict · /predict/batch</text>
+  <text class="bs" x="782" y="732">GET /model/info</text>
+  <text class="bs" x="782" y="748">GET /metrics (Prometheus)</text>
+  <text class="bs" x="782" y="764">JSON logs → stdout</text>
+  <text class="bs" x="782" y="780">X-Request-ID tracing</text>
+  <text class="bs" x="555" y="828">HPA 2-5 replicas @ 70 % CPU · PodDisruptionBudget minAvailable 1</text>
+  <text class="bs" x="555" y="846">ConfigMap · ServiceAccount (no token) · CPU/memory requests + limits</text>
+  <text class="bs" x="555" y="864">image: heart-disease-api:1.0.0 (minikube image load) or GHCR</text>
+
+  <rect class="b mon" x="1030" y="615" width="250" height="120"/>
+  <text class="bt" x="1045" y="640">Prometheus (ns monitoring)</text>
+  <text class="bs" x="1045" y="660">kubernetes_sd: pods with</text>
+  <text class="bs" x="1045" y="676">prometheus.io/scrape=true</text>
+  <text class="bs" x="1045" y="692">scrape every 10 s</text>
+  <text class="bs" x="1045" y="708">alert rules: down, model not</text>
+  <text class="bs" x="1045" y="724">loaded, 5xx rate, p95, drift</text>
+
+  <rect class="b mon" x="1320" y="615" width="240" height="120"/>
+  <text class="bt" x="1335" y="640">Grafana</text>
+  <text class="bs" x="1335" y="660">provisioned datasource +</text>
+  <text class="bs" x="1335" y="676">"Heart Disease API" dashboard</text>
+  <text class="bs" x="1335" y="692">14 panels: traffic, latency,</text>
+  <text class="bs" x="1335" y="708">errors, outcomes, risk bands,</text>
+  <text class="bs" x="1335" y="724">mean P(disease) drift signal</text>
+
+  <rect class="b mon" x="1030" y="760" width="530" height="120"/>
+  <text class="bt" x="1045" y="785">Logging</text>
+  <text class="bs" x="1045" y="805">one JSON line per request: ts, request_id, method, path, status, duration_ms, client</text>
+  <text class="bs" x="1045" y="821">one JSON line per prediction: request_id, model_version, prediction, probability, risk</text>
+  <text class="bs" x="1045" y="837">422 validation errors logged with field details · counted in heart_api_validation_errors_total</text>
+  <text class="bs" x="1045" y="853">read with kubectl logs · ready for Loki / ELK / CloudWatch shipping</text>
+
+  <rect class="b" x="40" y="905" width="1520" height="115" style="fill:#fbfbfb;stroke:#9aa5b1;stroke-dasharray:6 4"/>
+  <text class="bt" x="55" y="930">Local alternative - docker-compose.yml</text>
+  <text class="bs" x="55" y="952">api (heart-disease-api:1.0.0, :8000) + prom/prometheus:v2.54.1 (:9090, static scrape of api:8000) + grafana/grafana:11.2.2 (:3000) sharing the same alert rules and dashboard JSON.</text>
+  <text class="bs" x="55" y="972">Models flow: CI ③ trains → artifact → ④ bakes it into the image → ⑤ deploys that exact image to kind → ⑥ pushes it to GHCR → Minikube/any cluster pulls it.</text>
+  <text class="bs" x="55" y="992">Reproducibility: pinned requirements, fixed random_state=42, SHA-256-verified dataset, model metadata records git commit + dataset hash + MLflow run id.</text>
+
+  <path class="e" d="M210,680 L258,655"/>
+  <path class="e" d="M210,715 L258,740"/>
+  <path class="e" d="M490,652 L538,700"/>
+  <path class="e" d="M490,742 L538,760"/>
+  <path class="eg" d="M980,700 L1028,680"/>
+  <text class="lbl" x="985" y="682">scrape</text>
+  <path class="eg" d="M1280,675 L1318,675"/>
+  <path class="eg" d="M980,800 L1028,815"/>
+  <text class="lbl" x="986" y="796">stdout</text>
+  <path class="e" d="M1430,485 C1430,560 900,560 900,612"/>
+  <text class="lbl" x="1180" y="552">image</text>
+  <path class="e" d="M1230,310 C1230,345 890,345 890,393"/>
+  <text class="lbl" x="1240" y="338">model artifact</text>
+</svg>

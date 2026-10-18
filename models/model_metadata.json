@@ -2,10 +2,10 @@
   "model_name": "heart-disease-classifier",
   "model_family": "logistic_regression",
   "model_version": "1.0.0+logistic_regression",
-  "mlflow_run_id": "61f75fbcf840489786bb64e7932165dd",
+  "mlflow_run_id": "34b68a55f8c14d6e8747b8764aca30dc",
   "mlflow_registry_version": 1,
-  "trained_at": "2026-10-18T20:24:57+00:00",
-  "git_commit": "unknown",
+  "trained_at": "2026-10-18T20:51:16+00:00",
+  "git_commit": "a3c339814e8888db25c6bc264c713cee924b618f",
   "dataset_sha256": "de5874328223ea2c8ce1ae525a4d192e91debe547967c1299238100377fb284f",
   "decision_threshold": 0.5,
   "features": [

@@ -415,7 +415,7 @@ def main() -> None:
     parser.add_argument("--quick", action="store_true", help="single-candidate search for smoke testing")
     parser.add_argument("--no-register", action="store_true", help="skip MLflow model registry")
     args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", force=True)
     logging.getLogger("mlflow").setLevel(logging.WARNING)
     metadata = run(quick=args.quick, register=not args.no_register)
     print(json.dumps({"champion": metadata["model_family"], **metadata["test_metrics"]}, indent=2))

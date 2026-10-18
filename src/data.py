@@ -164,7 +164,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Download and clean the UCI Heart Disease dataset")
     parser.add_argument("--force", action="store_true", help="re-download even if a verified copy exists")
     args = parser.parse_args()
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s", force=True)
     run(force=args.force)
 
 

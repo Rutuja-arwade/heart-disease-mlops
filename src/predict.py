@@ -17,7 +17,7 @@ from src import config
 
 
 def risk_level(probability: float) -> str:
-    if probability < 0.3:
+    if probability < 0.35:  # deliberate bug for CI failure demo
         return "low"
     if probability < 0.6:
         return "moderate"

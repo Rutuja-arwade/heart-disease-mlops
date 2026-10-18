@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: heart-api-config
+  namespace: heart-disease
+  labels:
+    app.kubernetes.io/name: heart-disease-api
+data:
+  LOG_LEVEL: "INFO"
+  PORT: "8000"
+  WORKERS: "1"

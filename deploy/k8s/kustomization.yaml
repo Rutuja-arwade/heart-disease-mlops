@@ -1,0 +1,16 @@
+# kubectl apply -k deploy/k8s
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - hpa.yaml
+  - pdb.yaml
+# Override the image for a registry build, e.g.:
+# images:
+#   - name: heart-disease-api
+#     newName: ghcr.io/rutuja-arwade/heart-disease-api
+#     newTag: latest

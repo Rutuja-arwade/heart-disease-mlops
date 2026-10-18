@@ -1,0 +1,10 @@
+apiVersion: v2
+name: heart-disease-api
+description: FastAPI service serving the UCI heart disease risk classifier
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords: [mlops, fastapi, scikit-learn, heart-disease]
+maintainers:
+  - name: Rutuja Arwade
+    email: arwaderutuja1@gmail.com

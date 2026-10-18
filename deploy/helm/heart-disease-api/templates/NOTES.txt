@@ -1,0 +1,13 @@
+Heart disease risk API deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+{{- if eq .Values.service.type "LoadBalancer" }}
+LoadBalancer service (on Minikube run `minikube tunnel` in another terminal):
+  kubectl get svc {{ include "heart-api.fullname" . }} -n {{ .Release.Namespace }}
+  curl http://<EXTERNAL-IP>:{{ .Values.service.port }}/health
+{{- end }}
+{{- if .Values.ingress.enabled }}
+Ingress host: http://{{ .Values.ingress.host }}/docs
+{{- end }}
+Port-forward fallback:
+  kubectl port-forward svc/{{ include "heart-api.fullname" . }} -n {{ .Release.Namespace }} 8080:{{ .Values.service.port }}
+  curl -X POST localhost:8080/predict -H 'Content-Type: application/json' -d @sample_request.json

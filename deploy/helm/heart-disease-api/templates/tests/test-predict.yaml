@@ -1,0 +1,22 @@
+# `helm test <release>` - calls /predict from inside the cluster.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "heart-api.fullname" . }}-test-predict"
+  labels:
+    {{- include "heart-api.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  restartPolicy: Never
+  containers:
+    - name: curl
+      image: curlimages/curl:8.10.1
+      command: ["sh", "-c"]
+      args:
+        - >-
+          curl -fsS -X POST http://{{ include "heart-api.fullname" . }}:{{ .Values.service.port }}/predict
+          -H 'Content-Type: application/json'
+          -d '{"age":63,"sex":1,"cp":4,"trestbps":150,"chol":286,"fbs":0,"restecg":2,"thalach":108,"exang":1,"oldpeak":1.5,"slope":2,"ca":3,"thal":7}'
+          | grep -q '"prediction"'

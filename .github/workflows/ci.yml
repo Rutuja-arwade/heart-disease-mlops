@@ -1,0 +1,274 @@
+name: ci-cd
+
+# Lint -> unit tests -> model training (MLflow) -> Docker build & container test
+#   -> Kubernetes deploy test on kind -> publish image to GHCR (main only).
+# Any failing step fails the workflow; every job uploads its logs/artifacts.
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "screenshots/**", "**.md"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash # bash -eo pipefail: any failing command fails the step
+
+env:
+  PYTHON_VERSION: "3.11"
+  IMAGE_NAME: heart-disease-api
+
+jobs:
+  lint:
+    name: Lint (ruff + helm + manifests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install ruff==0.7.2
+      - name: Ruff lint
+        run: ruff check . --output-format=github
+      - name: Ruff format check
+        run: ruff format --check --diff .
+      - uses: azure/setup-helm@v4
+      - name: Helm lint
+        run: helm lint deploy/helm/heart-disease-api && helm lint deploy/helm/heart-disease-api -f deploy/helm/heart-disease-api/values-ci.yaml
+      - name: Render manifests
+        run: |
+          mkdir -p rendered
+          kubectl kustomize deploy/k8s > rendered/k8s.yaml
+          kubectl kustomize monitoring > rendered/monitoring.yaml
+          helm template heart deploy/helm/heart-disease-api > rendered/helm.yaml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rendered-manifests
+          path: rendered/
+
+  test:
+    name: Unit tests (pytest)
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Install dependencies (clean environment)
+        run: pip install -r requirements-dev.txt
+      - name: Verify dataset (download script, checksum)
+        run: python -m src.data
+      - name: Run pytest
+        run: |
+          pytest -v --junitxml=reports/junit.xml \
+            --cov=src --cov-report=xml:reports/coverage.xml --cov-report=term-missing \
+            | tee reports/pytest.log
+          exit ${PIPESTATUS[0]}
+      - name: Publish test summary
+        if: always()
+        run: |
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import xml.etree.ElementTree as ET
+          s = ET.parse("reports/junit.xml").getroot()
+          s = s if s.tag == "testsuite" else s[0]
+          print("### Unit tests")
+          print(f"| tests | failures | errors | skipped | time (s) |\n|---|---|---|---|---|")
+          print(f"| {s.get('tests')} | {s.get('failures')} | {s.get('errors')} | {s.get('skipped')} | {float(s.get('time')):.1f} |")
+          EOF
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: reports/
+
+  train:
+    name: Train & track models (MLflow)
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - run: pip install -r requirements.txt
+      - name: Data acquisition & cleaning
+        run: python -m src.data 2>&1 | tee train.log
+      - name: EDA figures
+        run: python -m src.eda 2>&1 | tee -a train.log
+      - name: Train, tune and register models
+        run: |
+          set -o pipefail
+          python -m src.train 2>&1 | tee -a train.log
+      - name: Quality gate (champion must beat thresholds)
+        run: |
+          python - <<'EOF'
+          import json, sys
+          m = json.load(open("models/model_metadata.json"))
+          t = m["test_metrics"]; cv = m["cv_metrics"]
+          print(f"champion={m['model_family']} cv_auc={cv['cv_roc_auc_mean']:.3f} test_auc={t['test_roc_auc']:.3f}")
+          if cv["cv_roc_auc_mean"] < 0.85 or t["test_roc_auc"] < 0.85 or t["test_recall"] < 0.75:
+              sys.exit("Model quality gate failed")
+          EOF
+      - name: Training summary
+        run: |
+          python - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import pandas as pd
+          d = pd.read_csv("reports/metrics/model_comparison.csv")
+          cols = ["model", "cv_roc_auc_mean", "cv_accuracy_mean", "test_accuracy", "test_precision", "test_recall", "test_roc_auc"]
+          print("### Model comparison (5-fold CV + hold-out test)\n")
+          print("| " + " | ".join(cols) + " |")
+          print("|" + "---|" * len(cols))
+          for _, r in d[cols].round(3).iterrows():
+              print("| " + " | ".join(str(v) for v in r.values) + " |")
+          EOF
+      - uses: actions/upload-artifact@v4
+        with:
+          name: model
+          path: |
+            models/model.joblib
+            models/model_metadata.json
+            models/mlflow_model/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mlflow-tracking
+          path: |
+            mlruns/
+            mlflow.db
+            reports/
+            train.log
+
+  docker:
+    name: Build & test Docker image
+    needs: train
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use freshly trained model
+        uses: actions/download-artifact@v4
+        with:
+          name: model
+          path: models/
+      - uses: docker/setup-buildx-action@v3
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: ${{ env.IMAGE_NAME }}:1.0.0,${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            MODEL_VERSION=1.0.0
+            GIT_COMMIT=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run container and smoke test
+        run: |
+          docker run -d --name heart-api -p 8000:8000 ${{ env.IMAGE_NAME }}:1.0.0
+          ./scripts/smoke_test.sh http://localhost:8000 | tee docker-smoke.log
+          exit ${PIPESTATUS[0]}
+      - name: Container health and logs
+        if: always()
+        run: |
+          docker inspect --format '{{.State.Health.Status}}' heart-api || true
+          docker logs heart-api > docker-container.log 2>&1 || true
+          docker image ls ${{ env.IMAGE_NAME }}
+      - name: Save image
+        run: docker save ${{ env.IMAGE_NAME }}:1.0.0 | gzip > image.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: image.tar.gz
+          retention-days: 3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docker-logs
+          path: docker-*.log
+
+  deploy-kind:
+    name: Deploy to Kubernetes (kind + Helm)
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: heart
+      - uses: azure/setup-helm@v4
+      - name: Load image into kind
+        run: |
+          gunzip -c image.tar.gz | docker load
+          kind load docker-image ${{ env.IMAGE_NAME }}:1.0.0 --name heart
+      - name: Validate raw manifests against the API server
+        run: |
+          kubectl create namespace heart-disease
+          kubectl apply -k deploy/k8s --dry-run=server
+      - name: Helm install
+        run: |
+          helm upgrade --install heart deploy/helm/heart-disease-api \
+            -n heart-disease --create-namespace \
+            -f deploy/helm/heart-disease-api/values-ci.yaml --wait --timeout 3m
+      - name: Helm test (in-cluster /predict)
+        run: helm test heart -n heart-disease --logs
+      - name: Verify endpoint via port-forward
+        run: |
+          kubectl port-forward -n heart-disease svc/heart-heart-disease-api 8080:8080 &
+          sleep 5
+          ./scripts/smoke_test.sh http://localhost:8080 | tee k8s-smoke.log
+          exit ${PIPESTATUS[0]}
+      - name: Collect cluster state
+        if: always()
+        run: |
+          {
+            kubectl get all -n heart-disease -o wide
+            echo; kubectl describe deployment -n heart-disease
+            echo; kubectl logs -n heart-disease -l app.kubernetes.io/name=heart-disease-api --tail=50
+          } > k8s-state.log 2>&1
+          cat k8s-state.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: k8s-deploy-logs
+          path: k8s-*.log
+
+  publish:
+    name: Publish image to GHCR
+    needs: deploy-kind
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+      - name: Push to ghcr.io
+        run: |
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          IMAGE=ghcr.io/${OWNER}/${{ env.IMAGE_NAME }}
+          gunzip -c image.tar.gz | docker load
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          for TAG in 1.0.0 latest ${{ github.sha }}; do
+            docker tag ${{ env.IMAGE_NAME }}:1.0.0 ${IMAGE}:${TAG}
+            docker push ${IMAGE}:${TAG}
+          done
+          echo "### Published \`${IMAGE}:latest\`" >> "$GITHUB_STEP_SUMMARY"

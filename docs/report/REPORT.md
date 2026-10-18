@@ -1,7 +1,7 @@
 # Heart Disease Risk Prediction: End-to-End MLOps Pipeline
 
 **Course:** Machine Learning Operations (AIMLCZG523), Assignment 1 (50 marks)\
-**Student:** Rutuja Arwade  ·  **BITS ID:** _<to be filled in>_\
+**Student:** Rutuja Arwade  ·  **BITS ID:** ____________ (to be filled in)\
 **Code repository:** <https://github.com/Rutuja-arwade/heart-disease-mlops>\
 **Container image:** `ghcr.io/rutuja-arwade/heart-disease-api:latest`\
 **CI/CD runs:** <https://github.com/Rutuja-arwade/heart-disease-mlops/actions>\
